@@ -1,4 +1,5 @@
 from keras.models import Sequential
+import copy
 
 class cube:
 	def __init__(self, state):
@@ -6,45 +7,47 @@ class cube:
 
 	# face: F = 0, R = 1, B = 2, L = 3, U = 4, D = 5; prime: True, False
 	def move(self, face, prime):
-		copy = self.state.copy()
+		rep = copy.deepcopy(self.state)
 
 		if face == 0:
 			if prime == True:
 				# rotated face
-				self.state[0][0] = copy[0][1]
-				self.state[0][1] = copy[0][2]
-				self.state[0][2] = copy[0][3]
-				self.state[0][3] = copy[0][0]
+				print(rep[0][0])
+				self.state[0][0] = rep[0][1]
+				self.state[0][1] = rep[0][2]
+				self.state[0][2] = rep[0][3]
+				print(rep[0][0])
+				self.state[0][3] = rep[0][0]
 				# right face (rel rot)
-				self.state[1][0] = copy[5][3]
-				self.state[1][3] = copy[5][2]
+				self.state[1][0] = rep[5][3]
+				self.state[1][3] = rep[5][2]
 				# bottom face (rel rot)
-				self.state[5][3] = copy[3][2]
-				self.state[5][2] = copy[3][1]
+				self.state[5][3] = rep[3][2]
+				self.state[5][2] = rep[3][1]
 				# left face (rel rot)
-				self.state[3][2] = copy[4][3]
-				self.state[3][1] = copy[4][2]
+				self.state[3][2] = rep[4][3]
+				self.state[3][1] = rep[4][2]
 				# upper face (rel rot)
-				self.state[4][3] = copy[1][0]
-				self.state[4][2] = copy[1][3]
+				self.state[4][3] = rep[1][0]
+				self.state[4][2] = rep[1][3]
 			else:
 				# rotated face
-				self.state[0][0] = copy[0][3]
-				self.state[0][1] = copy[0][0]
-				self.state[0][2] = copy[0][1]
-				self.state[0][3] = copy[0][2]
+				self.state[0][0] = rep[0][3]
+				self.state[0][1] = rep[0][0]
+				self.state[0][2] = rep[0][1]
+				self.state[0][3] = rep[0][2]
 				# right face (rel rot)
-				self.state[1][0] = copy[4][3]
-				self.state[1][3] = copy[4][2]
+				self.state[1][0] = rep[4][3]
+				self.state[1][3] = rep[4][2]
 				# upper face (rel rot)
-				self.state[4][3] = copy[3][2]
-				self.state[4][2] = copy[3][1]
+				self.state[4][3] = rep[3][2]
+				self.state[4][2] = rep[3][1]
 				# left face (rel rot)
-				self.state[3][2] = copy[5][3]
-				self.state[3][1] = copy[5][2]
+				self.state[3][2] = rep[5][3]
+				self.state[3][1] = rep[5][2]
 				# bottom face (rel rot)
-				self.state[5][3] = copy[1][0]
-				self.state[5][2] = copy[1][3]
+				self.state[5][3] = rep[1][0]
+				self.state[5][2] = rep[1][3]
 
 class nn:
 	def __init__(self):
