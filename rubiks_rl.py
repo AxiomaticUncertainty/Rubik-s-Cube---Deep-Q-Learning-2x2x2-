@@ -1,5 +1,6 @@
 from keras.models import Sequential
 import copy
+import random
 
 class cube:
 	def __init__(self, state):
@@ -235,6 +236,12 @@ class cube:
 
 	# for 'num' times, make random moves in order to scramble the cube
 	def scramble(self, num):
+		for n in range(0, num):
+			self.move(random.randint(0, 5), random.choice([True, False]))
+		print(self.state)
+
+	# TODO - add one-hot encoding 'get' method in for network inputs
+	def one_hot(self):
 		pass
 
 class nn:
@@ -250,3 +257,4 @@ class nn:
 
 if __name__ == '__main__':
 	c = cube([[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[16,17,18,19],[20,21,22,23]]) # default arrangement, with each sub-list (face) being in the same order as is used for cube.move
+	c.scramble(30) # make 30 random turns in order to scramble the cube
