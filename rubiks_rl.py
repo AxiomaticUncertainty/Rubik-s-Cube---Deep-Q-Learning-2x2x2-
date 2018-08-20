@@ -49,6 +49,10 @@ class cube:
 				self.state[5][3] = rep[1][0]
 				self.state[5][2] = rep[1][3]
 
+	# for 'num' times, make random moves in order to scramble the cube
+	def scramble(self, num):
+		pass
+
 class nn:
 	def __init__(self):
 		pass
