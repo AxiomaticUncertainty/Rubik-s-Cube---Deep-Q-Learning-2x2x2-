@@ -5,6 +5,7 @@ from keras import optimizers
 import copy
 import random
 import numpy as np
+import math
 
 class cube:
 	def __init__(self, state):
@@ -272,6 +273,7 @@ class cube:
 					c_side.append('y')
 			c_state.append(c_side.copy())
 		return c_state
+		
 	def is_solved(self):
 		col = self.colorize()
 		# check for all stickers of a color being on the same side
@@ -280,11 +282,23 @@ class cube:
 				return False
 		return True
 
+	def train(self, games, e_greedy, epochs):
+		for i in range(games):
+			states = []
+			actions = []
+			while not self.is_solved():
+				if random.uniform(0, 1) <= e_greedy:
+					self.scramble(1)
+				else:
+					pre = self.model.predict(np.asarray([self.one_hot(self.state)]))[0]
+					best = np.argmax(pre)
+					self.move(math.floor(best / 2), bool(best % 2))
+
 class nn:
 	def __init__(self):
 		self.create_model()
 
-	def create_model():
+	def create_model(self):
 		self.model = Sequential()
 		self.model.add(Dense(units=2000, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
 		self.model.add(Dense(units=3500, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
