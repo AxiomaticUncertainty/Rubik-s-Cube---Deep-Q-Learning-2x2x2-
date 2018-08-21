@@ -1,6 +1,7 @@
 from keras.models import Sequential
 import copy
 import random
+import numpy as np
 
 class cube:
 	def __init__(self, state):
@@ -242,7 +243,41 @@ class cube:
 
 	# TODO - add one-hot encoding 'get' method in for network inputs
 	def one_hot(self):
-		pass
+		oh_state = []
+		for side in self.state:
+			for sticker in side:
+				oh = np.zeros(24)
+				oh[(self.state.index(side)*4 - 1) + side.index(sticker)] = 1
+				oh_state.append(oh.copy())
+		return oh_state
+
+	def colorize(self):
+		c_state = []
+		for side in self.state:
+			c_side = []
+			for sticker in side:
+				if sticker < 4:
+					c_side.append('o')
+				elif sticker < 8:
+					c_side.append('g')
+				elif sticker < 12:
+					c_side.append('r')
+				elif sticker < 16:
+					c_side.append('b')
+				elif sticker < 20:
+					c_side.append('w')
+				else:
+					c_side.append('y')
+			c_state.append(c_side.copy())
+		return c_state
+	def is_solved(self):
+		col = self.colorize()
+		# check for all stickers of a color being on the same side
+		for side in col:
+			if not (side[0] == side[1] == side[2] == side[3]):
+				return False
+
+		return True
 
 class nn:
 	def __init__(self):
@@ -257,4 +292,6 @@ class nn:
 
 if __name__ == '__main__':
 	c = cube([[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[16,17,18,19],[20,21,22,23]]) # default arrangement, with each sub-list (face) being in the same order as is used for cube.move
+	print(c.is_solved())
 	c.scramble(30) # make 30 random turns in order to scramble the cube
+	print(c.is_solved())
