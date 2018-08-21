@@ -273,7 +273,7 @@ class cube:
 					c_side.append('y')
 			c_state.append(c_side.copy())
 		return c_state
-		
+
 	def is_solved(self):
 		col = self.colorize()
 		# check for all stickers of a color being on the same side
@@ -281,18 +281,6 @@ class cube:
 			if not (side[0] == side[1] == side[2] == side[3]):
 				return False
 		return True
-
-	def train(self, games, e_greedy, epochs):
-		for i in range(games):
-			states = []
-			actions = []
-			while not self.is_solved():
-				if random.uniform(0, 1) <= e_greedy:
-					self.scramble(1)
-				else:
-					pre = self.model.predict(np.asarray([self.one_hot(self.state)]))[0]
-					best = np.argmax(pre)
-					self.move(math.floor(best / 2), bool(best % 2))
 
 class nn:
 	def __init__(self):
@@ -311,6 +299,19 @@ class nn:
 
 	def __call__(self):
 		return self.model
+
+	def train(self, games, e_greedy, epochs):
+		instance = cube([[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[16,17,18,19],[20,21,22,23]])
+		for i in range(games):
+			states = []
+			actions = []
+			while not instance.is_solved():
+				if random.uniform(0, 1) <= e_greedy:
+					instance.scramble(1)
+				else:
+					pre = self.model.predict(np.asarray([instance.one_hot(instance.state)]))[0]
+					best = np.argmax(pre)
+					instance.move(math.floor(best / 2), bool(best % 2))
 
 if __name__ == '__main__':
 	network = nn()
