@@ -1,4 +1,7 @@
 from keras.models import Sequential
+from keras.layers import Dense
+from keras.models import load_model
+from keras import optimizers
 import copy
 import random
 import numpy as np
@@ -239,7 +242,6 @@ class cube:
 	def scramble(self, num):
 		for n in range(0, num):
 			self.move(random.randint(0, 5), random.choice([True, False]))
-		print(self.state)
 
 	# TODO - add one-hot encoding 'get' method in for network inputs
 	def one_hot(self):
@@ -276,22 +278,35 @@ class cube:
 		for side in col:
 			if not (side[0] == side[1] == side[2] == side[3]):
 				return False
-
 		return True
 
 class nn:
 	def __init__(self):
-		model = create_model()
+		self.create_model()
 
 	def create_model():
-		new = None
-		return new
+		self.model = Sequential()
+		self.model.add(Dense(units=2000, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
+		self.model.add(Dense(units=3500, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
+		self.model.add(Dense(units=4700, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
+		self.model.add(Dense(units=3000, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
+		self.model.add(Dense(units=1200, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
+		self.model.add(Dense(units=300, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
+		self.model.add(Dense(units=12, input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
+		self.model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
 
 	def __call__(self):
 		return self.model
 
 if __name__ == '__main__':
+	network = nn()
 	c = cube([[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[16,17,18,19],[20,21,22,23]]) # default arrangement, with each sub-list (face) being in the same order as is used for cube.move
 	print(c.is_solved())
 	c.scramble(30) # make 30 random turns in order to scramble the cube
 	print(c.is_solved())
+	iter = 0
+	while not c.is_solved():
+		c.scramble(1)
+		iter += 1
+	print('solved in ', iter, 'moves')
+	print(c.state)
