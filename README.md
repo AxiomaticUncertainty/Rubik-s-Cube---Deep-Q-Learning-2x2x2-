@@ -1,0 +1,3 @@
+- This is the finalized version of my 2x2x2 Rubik's cube solving ANN.
+- It runs a very large dense NN via Keras and can seemingly achieve decent results; however, I'll likely decrease the list size to max 100 (or increase the reward depreciation value)
+- This is extremely expensive, computationally, with most solves taking up to 20 minutes on my GPU. (with e_greedy of 1)
