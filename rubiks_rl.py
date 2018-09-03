@@ -6,6 +6,7 @@ import copy
 import random
 import numpy as np
 import math
+import os.path
 
 class cube:
 	def __init__(self, state):
@@ -35,6 +36,8 @@ class cube:
 				# upper face (rel rot)
 				self.state[4][3] = rep[1][0]
 				self.state[4][2] = rep[1][3]
+
+				return 0
 			else:
 				# rotated face
 				self.state[0][0] = rep[0][3]
@@ -53,6 +56,8 @@ class cube:
 				# bottom face (rel rot)
 				self.state[5][3] = rep[1][0]
 				self.state[5][2] = rep[1][3]
+
+				return 1
 		elif face == 1:
 			if prime == True:
 				# rotated face
@@ -72,6 +77,8 @@ class cube:
 				# upper face (rel rot)
 				self.state[4][2] = rep[2][0]
 				self.state[4][1] = rep[2][3]
+
+				return 2
 			else:
 				# rotated face
 				self.state[1][0] = rep[1][3]
@@ -90,6 +97,8 @@ class cube:
 				# bottom face (rel rot)
 				self.state[5][0] = rep[2][0]
 				self.state[5][3] = rep[2][3]
+
+				return 3
 		elif face == 2:
 			if prime == True:
 				# rotated face
@@ -109,6 +118,8 @@ class cube:
 				# upper face (rel rot)
 				self.state[4][1] = rep[3][0]
 				self.state[4][0] = rep[3][3]
+
+				return 4
 			else:
 				# rotated face
 				self.state[2][0] = rep[2][3]
@@ -127,6 +138,8 @@ class cube:
 				# bottom face (rel rot)
 				self.state[5][1] = rep[3][0]
 				self.state[5][0] = rep[3][3]
+
+				return 5
 		elif face == 3:
 			if prime == True:
 				# rotated face
@@ -146,6 +159,8 @@ class cube:
 				# upper face (rel rot)
 				self.state[4][0] = rep[0][0]
 				self.state[4][3] = rep[0][3]
+
+				return 6
 			else:
 				# rotated face
 				self.state[3][0] = rep[3][3]
@@ -164,6 +179,8 @@ class cube:
 				# bottom face (rel rot)
 				self.state[5][2] = rep[0][0]
 				self.state[5][1] = rep[0][3]
+
+				return 7
 		elif face == 4:
 			if prime == True:
 				# rotated face
@@ -183,6 +200,8 @@ class cube:
 				# upper face (rel rot)
 				self.state[2][1] = rep[1][1]
 				self.state[2][0] = rep[1][0]
+
+				return 8
 			else:
 				# rotated face
 				self.state[4][0] = rep[4][3]
@@ -201,6 +220,8 @@ class cube:
 				# bottom face (rel rot)
 				self.state[0][1] = rep[1][1]
 				self.state[0][0] = rep[1][0]
+
+				return 9
 		elif face == 5:
 			if prime == True:
 				# rotated face
@@ -220,6 +241,8 @@ class cube:
 				# upper face (rel rot)
 				self.state[2][3] = rep[3][3]
 				self.state[2][2] = rep[3][2]
+
+				return 10
 			else:
 				# rotated face
 				self.state[5][0] = rep[5][3]
@@ -239,10 +262,14 @@ class cube:
 				self.state[0][3] = rep[3][3]
 				self.state[0][2] = rep[3][2]
 
+				return 11
+
 	# for 'num' times, make random moves in order to scramble the cube
 	def scramble(self, num):
 		for n in range(0, num):
-			self.move(random.randint(0, 5), random.choice([True, False]))
+			sm = self.move(random.randint(0, 5), random.choice([True, False]))
+
+		return sm
 
 	# TODO - add one-hot encoding 'get' method in for network inputs
 	def one_hot(self):
@@ -251,7 +278,7 @@ class cube:
 			for sticker in side:
 				oh = np.zeros(24)
 				oh[(self.state.index(side)*4 - 1) + side.index(sticker)] = 1
-				oh_state.append(oh.copy())
+				oh_state.extend(oh.copy())
 		return oh_state
 
 	def colorize(self):
@@ -287,41 +314,83 @@ class nn:
 		self.create_model()
 
 	def create_model(self):
-		self.model = Sequential()
-		self.model.add(Dense(units=2000, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
-		self.model.add(Dense(units=3500, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
-		self.model.add(Dense(units=4700, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
-		self.model.add(Dense(units=3000, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
-		self.model.add(Dense(units=1200, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
-		self.model.add(Dense(units=300, activation='relu', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
-		self.model.add(Dense(units=12, input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
-		self.model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
+		if os.path.isfile('rubiks_rl.h5'):
+			print('Model found! Loading...')
+			self.model = load_model('rubiks_rl.h5')
+		else:
+			self.model = Sequential()
+			self.model.add(Dense(units=2000, activation='tanh', input_dim=576, kernel_initializer='random_uniform', bias_initializer='zeros'))
+			self.model.add(Dense(units=3500, activation='tanh', kernel_initializer='random_uniform', bias_initializer='zeros'))
+			self.model.add(Dense(units=4700, activation='tanh', kernel_initializer='random_uniform', bias_initializer='zeros'))
+			self.model.add(Dense(units=3000, activation='tanh', kernel_initializer='random_uniform', bias_initializer='zeros'))
+			self.model.add(Dense(units=1200, activation='tanh', kernel_initializer='random_uniform', bias_initializer='zeros'))
+			self.model.add(Dense(units=300, activation='tanh', kernel_initializer='random_uniform', bias_initializer='zeros'))
+			self.model.add(Dense(units=12, activation='sigmoid', kernel_initializer='random_uniform', bias_initializer='zeros'))
+			self.model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
 
 	def __call__(self):
 		return self.model
 
-	def train(self, games, e_greedy, epochs):
+	def preprocess(self, game, discount):
+		processed_out = []
+
+		for l in range(0, len(game)):
+			processed_out.append(np.asarray(game[l])*(discount**(len(game) - l - 1))) # reward dep
+
+		return processed_out
+
+	def train(self, games, e_greedy, epochs, discount):
 		instance = cube([[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[16,17,18,19],[20,21,22,23]])
+
+		long_states = []
+		long_actions = []
+
 		for i in range(games):
 			states = []
 			actions = []
+
+			counter = 0
+
+			instance.scramble(30)
+
 			while not instance.is_solved():
+				states.append(instance.one_hot())
+
 				if random.uniform(0, 1) <= e_greedy:
-					instance.scramble(1)
+					sampled = instance.scramble(1)
+					act = np.zeros(12)
+					act[sampled] = 1
 				else:
-					pre = self.model.predict(np.asarray([instance.one_hot(instance.state)]))[0]
+					pre = self.model.predict(np.asarray([instance.one_hot()]))[0]
 					best = np.argmax(pre)
+					act = np.zeros(12)
 					instance.move(math.floor(best / 2), bool(best % 2))
+					act[best] = 1
+
+				actions.append(act)
+
+				counter += 1
+
+				if counter % 10000 == 0:
+					print(counter)
+					print(len(states))
+
+				if len(states) == 50000:
+					states = states[25000:]
+					actions = actions[25000:]
+
+			long_states.extend(copy.deepcopy(states))
+			long_actions.extend(copy.deepcopy(self.preprocess(actions, discount)))
+
+		'''zipped = list(zip(long_states, long_actions))
+		zipped = random.shuffle(zipped)
+		long_states, long_actions = zip(*zipped)'''
+
+		self.model.fit(np.asarray(long_states), np.asarray(long_actions), batch_size=len(long_states), epochs=10)
+
+		self.model.save('rubiks_rl.h5')
 
 if __name__ == '__main__':
 	network = nn()
-	c = cube([[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[16,17,18,19],[20,21,22,23]]) # default arrangement, with each sub-list (face) being in the same order as is used for cube.move
-	print(c.is_solved())
-	c.scramble(30) # make 30 random turns in order to scramble the cube
-	print(c.is_solved())
-	iter = 0
-	while not c.is_solved():
-		c.scramble(1)
-		iter += 1
-	print('solved in ', iter, 'moves')
-	print(c.state)
+	while True:
+		network.train(1, 1, 10, .97)
